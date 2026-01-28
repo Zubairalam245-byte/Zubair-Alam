@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zubair Alam | Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- VARIABLES & PALETTE CONFIGURATION --- */
+        :root {
+            /* FONTS */
+            --font-head: 'Montserrat', sans-serif;
+            --font-body: 'Open Sans', sans-serif;
+
+            /* --- LIGHT MODE MAPPING (Default) --- */
+            --bg-color: #FBFBFB;        
+            --card-bg: #FFFFFF;        
+            
+            --text-main: #151419;            
+            --text-secondary: #262626;      
+            --text-muted: #878787;
+            
+            --accent-color: #F56E0F;        
+
+            /* TACTILE SHADOWS (Light) */
+            --shadow-light: -6px -6px 12px #FFFFFF;
+            --shadow-dark: 6px 6px 12px rgba(21, 20, 25, 0.1); 
+            
+            --shadow-inset: inset 4px 4px 8px rgba(21, 20, 25, 0.1), 
+                            inset -4px -4px 8px #FFFFFF;
+
+            --radius: 24px;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            
+            --tape-bg: #F56E0F;
+            --tape-text: #FFFFFF;
+        }
+
+        body.dark-mode {
+            /* --- DARK MODE MAPPING --- */
+            --bg-color: #151419;            
+            --card-bg: #1B1B1E;             
+
+            --text-main: #FBFBFB;            
+            --text-secondary: #878787;      
+            --text-muted: #262626;
+
+            --accent-color: #F56E0F;        
+
+            /* TACTILE SHADOWS (Dark) */
+            --shadow-light: -4px -4px 12px rgba(255, 255, 255, 0.03); 
+            --shadow-dark: 6px 6px 12px rgba(0, 0, 0, 0.8); 
+
+            --shadow-inset: inset 4px 4px 10px rgba(0, 0, 0, 0.8), 
+                            inset -4px -4px 10px rgba(255, 255, 255, 0.03);
+                            
+            --tape-bg: #F56E0F;
+            --tape-text: #000000;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; cursor: none; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-family: var(--font-body);
+            transition: var(--transition);
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        body.loading { overflow: hidden; }
+        
+        /* --- MODAL OPEN STATE (RESTORES CURSOR) --- */
+        body.modal-open { cursor: auto !important; }
+        body.modal-open * { cursor: auto !important; }
+        body.modal-open #custom-cursor { opacity: 0; visibility: hidden; }
+
+        h1, h2, h3, h4 { font-family: var(--font-head); color: var(--text-main); font-weight: 800; letter-spacing: -0.5px; }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+
+        /* --- NEW UNIQUE CURSOR (DIAMOND PRECISION) --- */
+        #custom-cursor {
+            position: fixed;
+            top: 0; left: 0;
+            width: 24px; height: 24px;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%) rotate(45deg); /* Diamond Rotation */
+            transition: width 0.3s, height 0.3s, background-color 0.3s, transform 0.1s;
+            mix-blend-mode: difference;
+        }
+
+        /* The Outer Box */
+        #custom-cursor::before {
+            content: '';
+            position: absolute; inset: 0;
+            border: 2px solid var(--accent-color);
+            transition: all 0.2s ease;
+        }
+
+        /* The Center Dot */
+        #custom-cursor::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 4px; height: 4px;
+            background-color: var(--accent-color);
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+
+        /* Hover State - Expands and fills */
+        body.hovering #custom-cursor {
+            transform: translate(-50%, -50%) rotate(0deg) scale(1.2); /* Rotates back to square */
+        }
+        body.hovering #custom-cursor::before {
+            background-color: rgba(245, 110, 15, 0.2);
+            border-color: var(--text-main);
+        }
+
+        /* --- LAYOUT --- */
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 30px; }
+        .section-title { font-size: 3rem; margin-bottom: 4rem; text-align: center; opacity: 0; transform: translateY(30px); position: relative; z-index: 2; }
+
+        /* --- TACTILE CARD --- */
+        .card, .stat-card, .record-details, .testimonial-card, .modal-content, .gallery-card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-dark), var(--shadow-light);
+            padding: 2.5rem;
+            transition: var(--transition);
+            border: none;
+            position: relative; z-index: 2;
+        }
+
+        .card:hover, .gallery-card:hover { transform: translateY(-5px); box-shadow: 8px 8px 16px rgba(0,0,0, 0.1), -8px -8px 16px var(--shadow-light); }
+
+        /* --- CONTROL CENTER STYLES --- */
+        .menu-toggle {
+            position: fixed; top: 30px; right: 5%; width: 50px; height: 50px; border-radius: 50%;
+            background-color: var(--card-bg); box-shadow: var(--shadow-dark), var(--shadow-light);
+            z-index: 1002; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; cursor: none; transition: var(--transition);
+        }
+        .menu-toggle:hover { transform: scale(1.1); }
+        .bar { width: 24px; height: 2px; background-color: var(--text-main); transition: all 0.3s ease; border-radius: 2px; }
+        .menu-toggle.active .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+        .menu-toggle.active .bar:nth-child(2) { opacity: 0; }
+        .menu-toggle.active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+        .control-center {
+            position: fixed; top: 90px; right: 5%; width: 320px;
+            background-color: var(--card-bg); border-radius: var(--radius);
+            box-shadow: var(--shadow-dark), var(--shadow-light); padding: 25px;
+            z-index: 1001; opacity: 0; visibility: hidden; transform: translateY(-20px) scale(0.95);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none;
+        }
+        .control-center.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); pointer-events: all; }
+        .control-section { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--text-muted); }
+        .control-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+        /* Toggle Switch */
+        .bg-toggle-container { display: flex; justify-content: space-between; align-items: center; }
+        .toggle-label { font-family: var(--font-head); font-weight: 700; color: var(--text-main); font-size: 0.9rem; }
+        .toggle-switch { position: relative; width: 50px; height: 28px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-track {
+            position: absolute; cursor: none; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--card-bg); box-shadow: var(--shadow-inset); border-radius: 34px; transition: .4s;
+        }
+        .toggle-knob {
+            position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px;
+            background-color: var(--accent-color); border-radius: 50%; transition: .4s; box-shadow: var(--shadow-dark);
+        }
+        input:checked + .toggle-track .toggle-knob { transform: translateX(22px); background-color: var(--text-main); }
+
+        /* Music Player */
+        .music-player { background-color: var(--card-bg); border-radius: 15px; box-shadow: var(--shadow-inset); padding: 15px; display: flex; flex-direction: column; gap: 15px; }
+        .track-info { display: flex; align-items: center; gap: 15px; }
+        .album-art { width: 50px; height: 50px; background-color: var(--text-main); border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+        .music-bars { display: flex; gap: 3px; align-items: flex-end; height: 20px; }
+        .bar-anim { width: 4px; background-color: var(--bg-color); height: 20%; transition: height 0.2s; }
+        
+        /* Only animate bars when playing */
+        .playing .bar-anim { animation: bounce 1s infinite ease-in-out alternate; }
+        .playing .bar-anim:nth-child(2) { animation-delay: 0.2s; height: 60%; }
+        .playing .bar-anim:nth-child(3) { animation-delay: 0.4s; height: 80%; }
+        
+        @keyframes bounce { 0% { height: 20%; } 100% { height: 100%; } }
+        
+        .song-details h4 { font-size: 0.9rem; margin-bottom: 2px; }
+        .song-details span { font-size: 0.7rem; font-weight: 600; opacity: 0.7; }
+        .player-controls { display: flex; justify-content: space-between; align-items: center; padding: 0 10px; }
+        .p-btn {
+            background: var(--card-bg); border: none; width: 35px; height: 35px; border-radius: 50%;
+            box-shadow: var(--shadow-dark), var(--shadow-light); display: flex; align-items: center; justify-content: center;
+            color: var(--text-main); transition: var(--transition);
+        }
+        .p-btn:hover { color: var(--accent-color); transform: scale(1.1); }
+        .p-btn:active { box-shadow: var(--shadow-inset); }
+        .p-btn.active { box-shadow: var(--shadow-inset); color: var(--accent-color); }
+        .clock-display { text-align: center; margin-top: 10px; }
+        .time-text { font-family: 'Courier New', monospace; font-weight: 700; font-size: 1.8rem; color: var(--text-main); text-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .date-text { font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; color: var(--accent-color); margin-top: 5px; }
+
+        /* --- NAVIGATION --- */
+        nav {
+            position: fixed; top: 30px; left: 50%; transform: translateX(-50%); width: auto; padding: 12px 40px;
+            border-radius: 50px; background-color: var(--card-bg); z-index: 1000; transition: var(--transition); box-shadow: var(--shadow-dark), var(--shadow-light);
+        }
+        .nav-content { display: flex; align-items: center; justify-content: center; gap: 3rem; }
+        .nav-links { display: flex; gap: 1rem; align-items: center; }
+        .nav-links a {
+            font-size: 0.95rem; font-weight: 700; color: var(--text-secondary); padding: 10px 20px; border-radius: 30px;
+            transition: all 0.3s ease; cursor: none; font-family: var(--font-head);
+        }
+        .nav-links a:hover { color: var(--text-main); box-shadow: var(--shadow-inset); }
+
+        /* --- HERO SECTION --- */
+        .hero { height: 100vh; padding-top: 80px; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; z-index: 1; overflow: hidden; }
+        .hero-illustration { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        .truss-main { fill: none; stroke: var(--text-secondary); stroke-width: 3; }
+        .truss-cross { fill: none; stroke: var(--text-muted); stroke-width: 1.5; }
+        .rig-motor { fill: var(--text-secondary); }
+        .schematic-line { fill: none; stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 10, 10; }
+        .light-fixture-body { fill: var(--text-secondary); }
+        .light-clamp { fill: none; stroke: var(--text-secondary); stroke-width: 2; }
+        .light-beam { fill: url(#beamGradient); opacity: 0; transform-origin: top center; animation: pulseBeam 4s infinite ease-in-out; }
+        .beam-left { animation-delay: 0s; transform: rotate(15deg); }
+        .beam-right { animation-delay: 2s; transform: rotate(-15deg); }
+        @keyframes pulseBeam { 0%, 100% { opacity: 0.2; transform: scaleY(0.9); } 50% { opacity: 0.6; transform: scaleY(1.1); } }
+        .hero-content h1 { font-size: 5rem; margin-bottom: 1.5rem; line-height: 1; color: var(--text-main); opacity: 0; transform: translateY(30px); }
+        .hero-content p { font-size: 1.4rem; font-weight: 600; color: var(--text-secondary); max-width: 700px; margin: 0 auto 3rem auto; opacity: 0; transform: translateY(30px); transition-delay: 0.2s; }
+
+        /* --- BUTTONS --- */
+        .btn {
+            display: inline-block; padding: 18px 45px; border-radius: 50px; background-color: var(--card-bg); color: var(--text-main);
+            font-family: var(--font-head); font-weight: 800; font-size: 1rem; border: none; box-shadow: var(--shadow-dark), var(--shadow-light);
+            cursor: none; transition: all 0.2s ease; opacity: 0; transform: translateY(30px); transition-delay: 0.4s;
+        }
+        .btn:hover { transform: translateY(-3px); color: var(--accent-color); }
+        .btn:active { box-shadow: var(--shadow-inset); transform: translateY(2px); color: var(--text-main); }
+
+        /* --- SECTIONS --- */
+        .about, .achievements, .projects, .testimonials, .gallery, .contact { padding: 7rem 0; position: relative; z-index: 2; }
+        .about-grid { display: grid; grid-template-columns: 1fr 0.8fr; gap: 5rem; align-items: center; }
+        .profile-img-container { width: 100%; height: 400px; border-radius: var(--radius); background-color: var(--card-bg); box-shadow: var(--shadow-inset); display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 10px; }
+        .profile-img { width: 100%; height: 100%; object-fit: cover; border-radius: 18px; filter: grayscale(20%); transition: all 0.5s ease; }
+        .profile-img-container:hover .profile-img { filter: grayscale(0%); transform: scale(1.02); }
+        .stat-number { font-family: var(--font-head); font-size: 4rem; font-weight: 800; color: var(--text-main); display: block; margin-bottom: 0.5rem; }
+        
+        .record-card { border-left: 8px solid var(--accent-color); }
+        .record-header { display: flex; justify-content: space-between; align-items: flex-start; mb-2; }
+        .record-badge { background: var(--accent-color); color: #fff; padding: 8px 20px; border-radius: 50px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; font-family: var(--font-head); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); }
+        .record-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; padding: 2rem; margin-top: 2rem; box-shadow: var(--shadow-inset); border-radius: 20px; }
+        
+        /* --- PROJECT GRID --- */
+        .project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; }
+        .projects { position: relative; overflow: hidden; } 
+        .tape-container {
+            width: 120%; background-color: var(--tape-bg); color: var(--tape-text); padding: 12px 0; position: absolute; left: -10%; z-index: 1; transform-origin: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1) 20px, transparent 20px, transparent 40px); border-top: 3px solid #000; border-bottom: 3px solid #000; opacity: 0.9;
+        }
+        .tape-top { top: 20px; transform: rotate(-2deg); }
+        .tape-bottom { bottom: 20px; transform: rotate(2deg); }
+        .tape-content { display: flex; white-space: nowrap; overflow: hidden; }
+        .scrolling-text { font-family: var(--font-head); font-weight: 800; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 2px; padding-right: 50px; flex-shrink: 0; }
+        .scroll-left { animation: scrollLeft 40s linear infinite; }
+        .scroll-right { animation: scrollRight 40s linear infinite; }
+        @keyframes scrollLeft { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+        @keyframes scrollRight { 0% { transform: translateX(-100%); } 100% { transform: translateX(0); } }
+
+        .project-card { display: flex; flex-direction: column; height: 100%; background-color: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow-dark), var(--shadow-light); padding: 2.5rem; transition: var(--transition); position: relative; z-index: 2; }
+        .project-card h3 { font-size: 1.8rem; margin-bottom: 0.5rem; line-height: 1.2; }
+        .project-year { font-size: 0.9rem; color: var(--accent-color); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.5rem; display: block; border-bottom: 2px solid var(--text-secondary); padding-bottom: 10px; width: fit-content; }
+        .tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; padding-top: 2rem; }
+        .tag { font-size: 0.75rem; padding: 8px 18px; border-radius: 50px; background-color: var(--card-bg); box-shadow: var(--shadow-dark), var(--shadow-light); color: var(--text-secondary); font-weight: 700; border: 1px solid var(--text-muted); }
+        
+        .testimonial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 3rem; }
+        .testimonial-card { text-align: center; font-style: italic; padding: 3rem; }
+        .client-name { margin-top: 2rem; font-weight: 800; font-style: normal; font-size: 1rem; display: block; color: var(--text-main); font-family: var(--font-head); }
+
+        /* --- GALLERY SECTION STYLES --- */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .gallery-card {
+            padding: 10px; /* Reduced padding for image frame feel */
+            height: 300px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .gallery-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 14px;
+            transition: transform 0.5s ease, filter 0.5s ease;
+            filter: grayscale(30%);
+        }
+        .gallery-card:hover .gallery-img {
+            transform: scale(1.1);
+            filter: grayscale(0%);
+        }
+
+        /* --- POPUP MODAL STYLES --- */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s ease;
+            cursor: auto !important; /* Forces system cursor inside modal background */
+        }
+        .modal.show { display: flex; opacity: 1; }
+        .modal-content {
+            width: 90%; max-width: 500px; text-align: center;
+            transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: auto !important; /* Forces system cursor inside modal card */
+        }
+        .modal.show .modal-content { transform: scale(1); }
+        .close-modal { position: absolute; top: 20px; right: 25px; font-size: 2rem; font-weight: bold; cursor: pointer; color: var(--text-secondary); transition: 0.2s; }
+        .close-modal:hover { color: var(--accent-color); }
+        .modal-options { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 2.5rem; }
+        .option-btn {
+            display: flex; align-items: center; justify-content: center; gap: 1rem;
+            padding: 20px; border-radius: 20px; font-weight: 700; font-family: var(--font-head); font-size: 1.1rem;
+            box-shadow: var(--shadow-dark), var(--shadow-light); transition: all 0.2s ease;
+            background-color: var(--card-bg); color: var(--text-main); cursor: pointer;
+        }
+        .option-btn:hover { transform: translateY(-3px); color: var(--accent-color); }
+        .option-btn:active { box-shadow: var(--shadow-inset); transform: translateY(2px); }
+        .option-icon { width: 24px; height: 24px; fill: currentColor; }
+
+        /* Footer */
+        footer { background-color: var(--bg-color); padding: 4rem 0 2rem 0; position: relative; z-index: 2; border-top: 1px solid var(--text-muted); opacity: 0.8; }
+        .footer-content { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+        .social-icon-link {
+            display: flex; align-items: center; justify-content: center;
+            width: 60px; height: 60px; border-radius: 50%;
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow-dark), var(--shadow-light);
+            transition: all 0.2s ease; cursor: none;
+        }
+        .social-icon-link:hover { transform: translateY(-3px); color: var(--accent-color); }
+        .social-icon-link:active { box-shadow: var(--shadow-inset); transform: translateY(2px); }
+        .social-icon { width: 24px; height: 24px; fill: var(--text-main); }
+        .copyright { font-weight: 600; opacity: 0.7; }
+
+        /* --- LOADING SCREEN --- */
+        #loader { 
+            position: fixed; inset: 0; width: 100vw; height: 100vh; background-color: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease, visibility 0.8s ease; 
+        }
+        .circle-loader-track {
+            width: 150px; height: 150px; border-radius: 50%;
+            background-color: var(--card-bg); box-shadow: var(--shadow-inset);
+            position: relative; display: flex; align-items: center; justify-content: center; margin: 0 auto; 
+        }
+        .circle-svg { width: 100%; height: 100%; transform: rotate(-90deg); position: absolute; }
+        .circle-progress {
+            fill: none; stroke: var(--accent-color); stroke-width: 12; stroke-linecap: round;
+            stroke-dasharray: 377; stroke-dashoffset: 377; transition: stroke-dashoffset 0.1s linear;
+            filter: drop-shadow(2px 2px 6px rgba(0,0,0,0.3));
+        }
+        .percentage { font-family: var(--font-head); font-size: 1.5rem; font-weight: 800; color: var(--text-main); position: relative; z-index: 2; }
+        .init-text { margin-top: 20px; font-family: var(--font-head); font-weight: 600; color: var(--text-secondary); text-align: center; }
+        .loader-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .reveal { opacity: 1 !important; transform: translateY(0) !important; transition: var(--transition); }
+
+        @media (max-width: 768px) {
+            .about-grid, .project-grid, .testimonial-grid, .gallery-grid { grid-template-columns: 1fr; gap: 3rem; }
+            .hero-content h1 { font-size: 3.5rem; }
+            .nav-links { display: none; }
+            .container { padding: 0 20px; }
+            .card { padding: 2rem; }
+            .stat-number { font-size: 3rem; }
+            .tape-container { width: 150%; left: -25%; } 
+            .menu-toggle { top: 20px; right: 20px; }
+            .control-center { top: 80px; right: 20px; width: 280px; }
+        }
+    </style>
+</head>
+<body class="loading">
+
+    <div id="custom-cursor"></div>
+
+    <div id="loader">
+        <div class="loader-content">
+            <div class="circle-loader-track">
+                <svg class="circle-svg" viewBox="0 0 140 140">
+                    <circle class="circle-progress" id="circleProgress" cx="70" cy="70" r="60"></circle>
+                </svg>
+                <span class="percentage" id="percentage">0%</span>
+            </div>
+            <div class="init-text" id="initText">Initializing...</div>
+        </div>
+    </div>
+
+    <div class="menu-toggle" id="menuToggle">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+    </div>
+
+    <div class="control-center" id="controlCenter">
+        <div class="control-section">
+            <div class="bg-toggle-container">
+                <span class="toggle-label">Dark Mode</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="bgToggle">
+                    <span class="toggle-track">
+                        <span class="toggle-knob"></span>
+                    </span>
+                </label>
+            </div>
+        </div>
+        <div class="control-section">
+            <div class="music-player" id="musicPlayerUI">
+                <div class="track-info">
+                    <div class="album-art" id="albumArt">
+                        <div class="music-bars">
+                            <div class="bar-anim"></div><div class="bar-anim"></div><div class="bar-anim"></div>
+                        </div>
+                    </div>
+                    <div class="song-details">
+                        <h4 id="songTitle">Loading...</h4>
+                        <span id="songArtist">Select Track</span>
+                    </div>
+                </div>
+                <div class="player-controls">
+                    <button class="p-btn" id="prevBtn"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M11 19l-9-7 9-7v14zm11 0l-9-7 9-7v14z"/></svg></button>
+                    <button class="p-btn play-pause" id="playBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></button>
+                    <button class="p-btn" id="nextBtn"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M13 19V5l9 7-9 7zM2 19V5l9 7-9 7z"/></svg></button>
+                </div>
+                
+                <audio id="audioTrack" src="music/song1.mp3"></audio>
+                </div>
+        </div>
+        <div class="clock-display">
+            <div class="time-text" id="digitalClock">00:00:00</div>
+            <div class="date-text" id="digitalDate">JAN 01, 2026</div>
+        </div>
+    </div>
+
+    <nav>
+        <div class="nav-content">
+            <ul class="nav-links">
+                <li><a href="#about">About</a></li>
+                <li><a href="#achievements">Achievements</a></li>
+                <li><a href="#projects">Work</a></li>
+                <li><a href="#gallery">Gallery</a></li>
+                <li><a href="#inquire">Inquire</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-illustration">
+            <svg width="100%" height="100%" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                    <linearGradient id="beamGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:var(--accent-color); stop-opacity:0.2" />
+                        <stop offset="100%" style="stop-color:var(--bg-color); stop-opacity:0" />
+                    </linearGradient>
+                </defs>
+                <g id="RiggingPlot">
+                    <path class="truss-main" d="M100,0 L100,300 M160,0 L160,300" /> 
+                    <path class="truss-cross" d="M100,0 L160,40 L100,80 L160,120 L100,160 L160,200 L100,240 L160,280" />
+                    <path class="truss-main" d="M1760,0 L1760,300 M1820,0 L1820,300" />
+                    <path class="truss-cross" d="M1760,0 L1820,40 L1760,80 L1820,120 L1760,160 L1820,200 L1760,240 L1820,280" />
+                    <path class="truss-main" d="M0,40 L1920,40 M0,100 L1920,100" opacity="0.6" />
+                    <path class="truss-cross" d="M160,40 L200,100 L240,40 L280,100 L320,40 L360,100 L400,40 L440,100" opacity="0.6"/>
+                    <rect class="rig-motor" x="120" y="-10" width="20" height="30" />
+                    <rect class="rig-motor" x="1780" y="-10" width="20" height="30" />
+                    <line class="schematic-line" x1="130" y1="20" x2="130" y2="1080" />
+                    <line class="schematic-line" x1="1790" y1="20" x2="1790" y2="1080" />
+                    <line class="schematic-line" x1="400" y1="100" x2="400" y2="1080" opacity="0.5" />
+                    <line class="schematic-line" x1="1520" y1="100" x2="1520" y2="1080" opacity="0.5" />
+                    <g transform="translate(400, 100)">
+                        <path class="light-clamp" d="M-25,-10 C-25,-30 25,-30 25,-10" fill="none"/>
+                        <rect class="light-fixture-body" x="-25" y="0" width="50" height="40" rx="5" />
+                        <path class="light-beam beam-left" d="M-20,40 L-120,850 L120,850 L20,40 Z" fill="url(#beamGradient)" />
+                    </g>
+                    <g transform="translate(1520, 100)">
+                        <path class="light-clamp" d="M-25,-10 C-25,-30 25,-30 25,-10" fill="none"/>
+                        <rect class="light-fixture-body" x="-25" y="0" width="50" height="40" rx="5" />
+                        <path class="light-beam beam-right" d="M-20,40 L-120,850 L120,850 L20,40 Z" fill="url(#beamGradient)" />
+                    </g>
+                </g>
+            </svg>
+        </div>
+
+        <div class="container hero-content">
+            <h1 class="anim-item">Zubair Alam</h1>
+            <p class="anim-item">Dynamic Event Operations & Management Professional.<br>Executing high-profile events across government, corporate, and entertainment sectors.</p>
+            <a href="#projects" class="btn anim-item">View My Work</a>
+        </div>
+    </section>
+
+    <section id="about" class="about">
+        <div class="container">
+            <div class="about-grid">
+                <div class="profile-img-container anim-item">
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop" alt="Profile" class="profile-img">
+                </div>
+                
+                <div class="about-text anim-item">
+                    <h2 class="section-title" style="text-align: left; margin-bottom: 1rem;">Who I Am</h2>
+                    <p style="font-size: 1.1rem;">I am a results-driven Event Operations Professional with over 7 years of experience. My expertise lies in bridging the gap between concept and execution, ensuring that large-scale events run seamlessly.</p>
+                    <p style="margin-top: 1.5rem; font-size: 1.1rem;">From managing heavy machinery logistics to overseeing delicate Guinness World Record attempts, I specialize in the details that make big events possible.</p>
+                    <div class="card stat-card" style="text-align: center; margin-top: 2rem;">
+                        <span class="stat-number">7+</span>
+                        <span style="color: var(--accent-color); text-transform: uppercase; font-weight: 700; letter-spacing: 1.5px;">Years Experience</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="achievements" class="achievements">
+        <div class="container">
+            <h2 class="section-title anim-item">Achievements</h2>
+            <div class="card record-card anim-item">
+                <div class="record-header">
+                    <div class="record-title">
+                        <h3>Guinness World Record Holder</h3>
+                        <p style="color: var(--accent-color); font-weight: 600; margin-top: 5px;">"Largest Leaf Sentence"</p>
+                    </div>
+                    <span class="record-badge">Official Record</span>
+                </div>
+                <div class="record-details">
+                    <div class="detail-item"><strong>Leaf Count</strong><span>7,574 Leaves</span></div>
+                    <div class="detail-item"><strong>Dimensions</strong><span>11.8m (L) x 1.7m (H)</span></div>
+                    <div class="detail-item"><strong>Location</strong><span>Al Ain Zoo, UAE</span></div>
+                    <div class="detail-item"><strong>Date</strong><span>Dec 14, 2024</span></div>
+                </div>
+                <p style="margin-top: 2rem; font-size: 1rem; line-height: 1.7;"><strong style="color: var(--text-main);">Sustainability Focus:</strong> The palm leaves were ethically sourced from naturally shed leaves, ensuring no trees were harmed. Collected responsibly from local farms, these leaves were repurposed for the achievement and will be recycled into paper to further support sustainability efforts.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects" class="projects">
+        <div class="tape-container tape-top">
+            <div class="tape-content">
+                <span class="scrolling-text scroll-right">MOHRA Eid Event • Mbzuai Graduation • 42 Abu Dhabi Graduation • Oppo Phone Launch 2024-2025 • Salesforce Gitex • Dewa Excellence Award • Dewa National Day • Al Ain Zoo Conservation Festival • Sole DXB 2024 • Weddings 2023-2025 • National Day Mall Activation • World Green Hydrogen Summit • SCB Priority Launch • ADEK • MEADFA Conference • Al Mandoos 2024-2025 • DFM National Day • Salesforce Office Opening • World Tour Essentials • GADAR 2 Movie Media Interaction • Art Be Apart • HIPA • Arab Plast • Japan Trade • PUBG Global Championship • EPEX • China Home Life • DIAD-DIAL • Garba • Dandiya Night • Dubai to Space • Mina IPO • IACAPAP • Engage Forum • Vision Expo • School & Nursery Show •</span>
+                <span class="scrolling-text scroll-right">MOHRA Eid Event • Mbzuai Graduation • 42 Abu Dhabi Graduation • Oppo Phone Launch 2024-2025 • Salesforce Gitex • Dewa Excellence Award • Dewa National Day • Al Ain Zoo Conservation Festival • Sole DXB 2024 • Weddings 2023-2025 • National Day Mall Activation • World Green Hydrogen Summit • SCB Priority Launch • ADEK • MEADFA Conference • Al Mandoos 2024-2025 • DFM National Day • Salesforce Office Opening • World Tour Essentials • GADAR 2 Movie Media Interaction • Art Be Apart • HIPA • Arab Plast • Japan Trade • PUBG Global Championship • EPEX • China Home Life • DIAD-DIAL • Garba • Dandiya Night • Dubai to Space • Mina IPO • IACAPAP • Engage Forum • Vision Expo • School & Nursery Show •</span>
+            </div>
+        </div>
+
+        <div class="container">
+            <h2 class="section-title anim-item">Selected Experience</h2>
+            <div class="project-grid">
+                <div class="card project-card anim-item">
+                    <div><span class="project-year">2025 (3 Months)</span><h3>Maestra</h3><p>Served as <strong>Production Manager</strong>. Oversaw production schedules, team coordination, and on-site execution for high-stakes deliverables.</p></div>
+                    <div class="tags"><span class="tag">Production Management</span><span class="tag">Team Leadership</span></div>
+                </div>
+                <div class="card project-card anim-item" style="transition-delay: 0.1s;">
+                    <div><span class="project-year">2025</span><h3>Monster Jam Liwa</h3><p>Managed client servicing and heavy machinery logistics. Responsible for 3 bobcats, 3 shovels, 2 excavators, and 2 cherry pickers.</p></div>
+                    <div class="tags"><span class="tag">Logistics</span><span class="tag">Heavy Machinery</span></div>
+                </div>
+                <div class="card project-card anim-item" style="transition-delay: 0.2s;">
+                    <div><span class="project-year">1 Year - Full Time</span><h3>Mosaic Live</h3><p>Handled day-to-day operations, vendor sourcing, site visits, and onsite supervision. ensured comprehensive show and operational management.</p></div>
+                    <div class="tags"><span class="tag">Vendor Management</span><span class="tag">Site Supervision</span></div>
+                </div>
+                <div class="card project-card anim-item">
+                    <div><span class="project-year">Contract</span><h3>Sole DXB</h3><p>Worked with Eventify as <strong>Zone Manager</strong>. Controlled crowd flow, safety protocols, and operational zoning for the region's premier lifestyle festival.</p></div>
+                    <div class="tags"><span class="tag">Zone Management</span><span class="tag">Crowd Control</span></div>
+                </div>
+                <div class="card project-card anim-item">
+                    <div><span class="project-year">2024 - 2025</span><h3>Dubai Games</h3><p>Executed comprehensive Stage Management for both 2024 and 2025 editions.</p></div>
+                    <div class="tags"><span class="tag">Stage Management</span><span class="tag">Live Events</span></div>
+                </div>
+                <div class="card project-card anim-item" style="transition-delay: 0.1s;">
+                    <div><span class="project-year">2025</span><h3>1Billion Followers Summit</h3><p>Served on the Overall Operations Team and led as Volunteers Program Manager.</p></div>
+                    <div class="tags"><span class="tag">Operations</span><span class="tag">Volunteer Management</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tape-container tape-bottom">
+            <div class="tape-content">
+                <span class="scrolling-text scroll-left">MOHRA Eid Event • Mbzuai Graduation • 42 Abu Dhabi Graduation • Oppo Phone Launch 2024-2025 • Salesforce Gitex • Dewa Excellence Award • Dewa National Day • Al Ain Zoo Conservation Festival • Sole DXB 2024 • Weddings 2023-2025 • National Day Mall Activation • World Green Hydrogen Summit • SCB Priority Launch • ADEK • MEADFA Conference • Al Mandoos 2024-2025 • DFM National Day • Salesforce Office Opening • World Tour Essentials • GADAR 2 Movie Media Interaction • Art Be Apart • HIPA • Arab Plast • Japan Trade • PUBG Global Championship • EPEX • China Home Life • DIAD-DIAL • Garba • Dandiya Night • Dubai to Space • Mina IPO • IACAPAP • Engage Forum • Vision Expo • School & Nursery Show •</span>
+                <span class="scrolling-text scroll-left">MOHRA Eid Event • Mbzuai Graduation • 42 Abu Dhabi Graduation • Oppo Phone Launch 2024-2025 • Salesforce Gitex • Dewa Excellence Award • Dewa National Day • Al Ain Zoo Conservation Festival • Sole DXB 2024 • Weddings 2023-2025 • National Day Mall Activation • World Green Hydrogen Summit • SCB Priority Launch • ADEK • MEADFA Conference • Al Mandoos 2024-2025 • DFM National Day • Salesforce Office Opening • World Tour Essentials • GADAR 2 Movie Media Interaction • Art Be Apart • HIPA • Arab Plast • Japan Trade • PUBG Global Championship • EPEX • China Home Life • DIAD-DIAL • Garba • Dandiya Night • Dubai to Space • Mina IPO • IACAPAP • Engage Forum • Vision Expo • School & Nursery Show •</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="testimonials" class="testimonials">
+        <div class="container">
+            <h2 class="section-title anim-item">Testimonials</h2>
+            <div class="testimonial-grid">
+                <div class="card testimonial-card anim-item">
+                    <p>"Zubair's attention to detail regarding the heavy machinery logistics was critical for the Monster Jam event. Seamless execution."</p>
+                    <span class="client-name">Project Lead, Monster Jam</span>
+                </div>
+                <div class="card testimonial-card anim-item" style="transition-delay: 0.2s;">
+                    <p>"Reliable, focused, and experienced. His handling of the zone management at Sole DXB ensured safety and flow were never compromised."</p>
+                    <span class="client-name">Ops Director, Eventify</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="gallery" class="gallery">
+        <div class="container">
+            <h2 class="section-title anim-item">Event Gallery</h2>
+            <div class="gallery-grid">
+                <div class="gallery-card anim-item">
+                    <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000&auto=format&fit=crop" alt="Event Crowd" class="gallery-img">
+                </div>
+                <div class="gallery-card anim-item" style="transition-delay: 0.1s;">
+                    <img src="https://images.unsplash.com/photo-1514525253440-b393452e8d26?q=80&w=1000&auto=format&fit=crop" alt="Stage Lighting" class="gallery-img">
+                </div>
+                <div class="gallery-card anim-item" style="transition-delay: 0.2s;">
+                    <img src="https://images.unsplash.com/photo-1470229722913-7ea051c24efc?q=80&w=1000&auto=format&fit=crop" alt="Concert Vibe" class="gallery-img">
+                </div>
+                <div class="gallery-card anim-item">
+                    <img src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=1000&auto=format&fit=crop" alt="Event Setup" class="gallery-img">
+                </div>
+                <div class="gallery-card anim-item" style="transition-delay: 0.1s;">
+                    <img src="https://images.unsplash.com/photo-1533174072545-e8d4aa97edf9?q=80&w=1000&auto=format&fit=crop" alt="Production Crew" class="gallery-img">
+                </div>
+                <div class="gallery-card anim-item" style="transition-delay: 0.2s;">
+                    <img src="https://images.unsplash.com/photo-1505236858274-0959ac156d7f?q=80&w=1000&auto=format&fit=crop" alt="Night Event" class="gallery-img">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="inquire" class="contact">
+        <div class="container contact-container">
+            <h2 class="anim-item section-title" style="margin-bottom: 1rem;">Ready to Collaborate?</h2>
+            <p class="anim-item" style="text-align: center; font-size: 1.2rem; margin-bottom: 1.5rem;">I am open for new opportunities in Event Operations & Management.</p>
+            
+            <div style="text-align: center; margin-top: 1rem;">
+                <button id="openInquireBtn" class="btn anim-item" style="padding: 22px 60px; font-size: 1.2rem;">Make an Inquiry</button>
+            </div>
+        </div>
+    </section>
+    
+    <footer>
+        <div class="container footer-content">
+            <div class="socials anim-item">
+                <a href="https://www.linkedin.com/in/zubair-alam-freelance/" target="_blank" class="social-icon-link">
+                    <svg class="social-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                </a>
+            </div>
+            <div class="copyright">&copy; 2026 Zubair Alam. All Rights Reserved.</div>
+        </div>
+    </footer>
+
+    <div id="inquireModal" class="modal">
+        <div class="modal-content card">
+            <span class="close-modal">&times;</span>
+            <h3 style="margin-bottom: 2rem;">Select Inquiry Method</h3>
+            <div class="modal-options">
+                <a href="https://wa.me/971585475109" target="_blank" class="option-btn">
+                    <svg class="option-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                    WhatsApp
+                </a>
+                
+                <a href="mailto:zzubairalam2@gmail.com" class="option-btn">
+                    <svg class="option-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                    Send Email
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. UNIQUE CUSTOM CURSOR LOGIC
+        const cursor = document.getElementById('custom-cursor');
+
+        window.addEventListener('mousemove', (e) => {
+            const posX = e.clientX;
+            const posY = e.clientY;
+            cursor.style.left = `${posX}px`;
+            cursor.style.top = `${posY}px`;
+        });
+
+        document.querySelectorAll('a, button, .switch-label, input, textarea, select, .menu-toggle, .option-btn').forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+        });
+
+        // 2. LOADING SEQUENCE
+        document.addEventListener("DOMContentLoaded", () => {
+            const messages = ["Initializing System...", "Loading Tactile UI...", "Configuring Viewport...", "Mounting Modules...", "Access Granted."];
+            const initText = document.getElementById('initText');
+            const circleProgress = document.getElementById('circleProgress');
+            const percentage = document.getElementById('percentage');
+            const loader = document.getElementById('loader');
+            let progress = 0; let msgIndex = 0; const totalDash = 377; 
+            const interval = setInterval(() => {
+                progress += Math.random() * 2 + 1; if (progress > 100) progress = 100;
+                const offset = totalDash - (progress / 100) * totalDash;
+                circleProgress.style.strokeDashoffset = offset;
+                percentage.innerText = `${Math.floor(progress)}%`;
+                if (progress > 20 && msgIndex === 0) { initText.innerText = messages[1]; msgIndex++; }
+                if (progress > 50 && msgIndex === 1) { initText.innerText = messages[2]; msgIndex++; }
+                if (progress > 80 && msgIndex === 2) { initText.innerText = messages[3]; msgIndex++; }
+                if (progress === 100) { 
+                    initText.innerText = messages[4]; clearInterval(interval);
+                    setTimeout(() => { loader.classList.add('loader-hidden'); document.body.classList.remove('loading'); }, 800); 
+                }
+            }, 50); 
+        });
+
+        // 3. ANIMATION OBSERVER
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) { entry.target.classList.add('reveal'); observer.unobserve(entry.target); }
+            });
+        }, { threshold: 0.15, rootMargin: "0px 0px -50px 0px" });
+        document.querySelectorAll('.anim-item, .section-title, .card, .socials, .profile-img-container, .gallery-card').forEach(el => observer.observe(el));
+
+        // 4. CONTROL CENTER LOGIC & MUSIC PLAYER
+        const menuToggle = document.getElementById('menuToggle');
+        const controlCenter = document.getElementById('controlCenter');
+        const bgToggle = document.getElementById('bgToggle');
+        
+        // --- MUSIC PLAYER LOGIC ---
+        const audio = document.getElementById('audioTrack');
+        const playBtn = document.getElementById('playBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const songTitle = document.getElementById('songTitle');
+        const songArtist = document.getElementById('songArtist');
+        const albumArt = document.getElementById('albumArt');
+
+        // Define your 2 tracks here
+        const tracks = [
+            {
+                title: "Event Vibes",
+                artist: "Zubair Mix Vol. 1",
+                src: "music/song1.mp3"
+            },
+            {
+                title: "Chill Operations",
+                artist: "Zubair Mix Vol. 2",
+                src: "music/song2.mp3"
+            }
+        ];
+
+        let currentTrackIndex = 0;
+
+        function loadTrack(index) {
+            audio.src = tracks[index].src;
+            songTitle.innerText = tracks[index].title;
+            songArtist.innerText = tracks[index].artist;
+        }
+
+        function togglePlay() {
+            if (audio.paused) {
+                audio.play();
+                playBtn.classList.add('active');
+                playBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'; // Pause Icon
+                albumArt.classList.add('playing');
+            } else {
+                audio.pause();
+                playBtn.classList.remove('active');
+                playBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>'; // Play Icon
+                albumArt.classList.remove('playing');
+            }
+        }
+
+        function nextTrack() {
+            currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+            loadTrack(currentTrackIndex);
+            if (playBtn.classList.contains('active')) {
+                audio.play();
+            }
+        }
+
+        function prevTrack() {
+            currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
+            loadTrack(currentTrackIndex);
+            if (playBtn.classList.contains('active')) {
+                audio.play();
+            }
+        }
+
+        // Initialize First Track
+        loadTrack(currentTrackIndex);
+
+        playBtn.addEventListener('click', togglePlay);
+        nextBtn.addEventListener('click', nextTrack);
+        prevBtn.addEventListener('click', prevTrack);
+        // --- END MUSIC PLAYER LOGIC ---
+
+        menuToggle.addEventListener('click', () => { menuToggle.classList.toggle('active'); controlCenter.classList.toggle('active'); });
+        document.addEventListener('click', (e) => {
+            if (!controlCenter.contains(e.target) && !menuToggle.contains(e.target)) {
+                menuToggle.classList.remove('active'); controlCenter.classList.remove('active');
+            }
+        });
+        bgToggle.addEventListener('change', () => { document.body.classList.toggle('dark-mode', bgToggle.checked); });
+
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { hour12: false });
+            const dateString = now.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase();
+            document.getElementById('digitalClock').innerText = timeString;
+            document.getElementById('digitalDate').innerText = dateString;
+        }
+        setInterval(updateClock, 1000); updateClock();
+
+        // 5. MODAL LOGIC (With Cursor Restore)
+        const modal = document.getElementById('inquireModal');
+        const openBtn = document.getElementById('openInquireBtn');
+        const closeBtn = document.querySelector('.close-modal');
+
+        function openModal() {
+            modal.style.display = "flex";
+            setTimeout(() => modal.classList.add('show'), 10);
+            document.body.classList.add('modal-open'); // This restores the system cursor
+        }
+
+        function closeModal() {
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = "none";
+                document.body.classList.remove('modal-open'); // This brings back custom cursor
+            }, 300);
+        }
+
+        openBtn.addEventListener('click', openModal);
+        closeBtn.addEventListener('click', closeModal);
+        window.addEventListener('click', (e) => {
+            if (e.target == modal) { closeModal(); }
+        });
+    </script>
+</body>
+</html>
